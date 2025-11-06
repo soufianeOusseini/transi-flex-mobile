@@ -438,6 +438,7 @@ class _ColisPageState extends State<ColisPage> {
   }
 
   void _showDeleteConfirm(BuildContext context, Colis colis) {
+    final colisCubit = context.read<ColisCubit>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -452,7 +453,7 @@ class _ColisPageState extends State<ColisPage> {
           TextButton(
             onPressed: () {
               if (colis.id != null) {
-                context.read<ColisCubit>().deleteColis(colis.id!);
+                colisCubit.deleteColis(colis.id!);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

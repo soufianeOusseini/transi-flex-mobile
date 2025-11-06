@@ -19,14 +19,12 @@ class RegisterRequest {
   final String lastName;
   final String phoneNumber;
   final String email;
-  final String password;
 
   RegisterRequest({
     required this.firstName,
     required this.lastName,
     required this.phoneNumber,
     required this.email,
-    required this.password,
   });
 
   Map<String, dynamic> toJson() {
@@ -35,7 +33,6 @@ class RegisterRequest {
       'lastName': lastName,
       'phoneNumber': phoneNumber,
       'email': email,
-      'password': password,
     };
   }
 
@@ -46,7 +43,6 @@ class RegisterRequest {
       lastName: json['lastName'] as String,
       phoneNumber: json['phoneNumber'] as String,
       email: json['email'] as String,
-      password: json['password'] as String,
     );
   }
 

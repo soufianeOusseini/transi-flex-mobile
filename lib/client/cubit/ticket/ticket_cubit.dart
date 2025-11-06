@@ -1,5 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:transi_flex_mobile/client/model/check_transaction.dart';
+import 'package:transi_flex_mobile/client/model/client_request.dart';
+import 'package:transi_flex_mobile/client/model/deposit_response.dart';
 import 'package:transi_flex_mobile/client/model/ticket.dart';
 import 'package:transi_flex_mobile/client/repository/ticket_repository.dart';
 
@@ -10,7 +13,6 @@ class TicketCubit extends Cubit<TicketState> {
 
   TicketCubit({required this.repository}) : super(TicketState.initial());
 
-  /// Récupérer tous les tickets de l'utilisateur connecté
   Future<void> getTicketsByUser() async {
     emit(state.copyWith(status: TicketBuyStatus.loading));
 
@@ -33,7 +35,6 @@ class TicketCubit extends Cubit<TicketState> {
     );
   }
 
-  /// Créer une nouvelle réservation ou acheter un ticket
   Future<void> createTicket(Ticket ticket) async {
     emit(state.copyWith(status: TicketBuyStatus.loading));
 
@@ -146,4 +147,45 @@ class TicketCubit extends Cubit<TicketState> {
   void clearError() {
     emit(state.copyWith(errorMessage: null));
   }
+
+  Future<void> makeDeposit({
+    required String phone,
+    required int amount,
+    required String network,
+  }) async {
+    emit(state.copyWith(status: TicketBuyStatus.payment_loading));
+
+    final request = ClientRequest(
+      phone: phone,
+      amount: amount,
+      network: network,
+    );
+
+    final result = await repository.makeDeposit(request);
+
+    result.fold(
+          (error) => emit(state.copyWith(status: TicketBuyStatus.payment_error)),
+          (response) => emit(state.copyWith(depositesponse: response,status: TicketBuyStatus.payment_success)),
+    );
+  }
+
+  Future<void> checkTransactionStatus({
+    required String txReference,
+    required String authToken,
+  }) async {
+    emit(state.copyWith(status: TicketBuyStatus.payment_loading));
+
+    final request = CheckTransaction(
+      txReference: txReference,
+      authToken: authToken,
+    );
+
+    final result = await repository.checkTransactionStatus(request);
+
+    result.fold(
+          (error) => emit(state.copyWith(status: TicketBuyStatus.payment_error)),
+          (response) => emit(state.copyWith(status: TicketBuyStatus.transaction_success)),
+    );
+  }
+
 }

@@ -229,7 +229,7 @@ class _ClientHomeViewState extends State<ClientHomeView> {
       date: formattedDate,
       time: "${formatHeure(nextTrip.heureDepart!)} h",
       seatInfo: "Demain à ${formatHeure(nextTrip.heureDepart!)} h",
-      status: TravelStatus.confirmed,
+      status: nextTrip.status == TicketStatus.PAYE ? TravelStatus.confirmed : nextTrip.status == TicketStatus.RESERVE ? TravelStatus.pending : TravelStatus.cancelled,
       onDetailsTap: () {
         _showDetails(nextTrip);
       },

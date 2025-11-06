@@ -48,13 +48,13 @@ class TravelCard extends StatelessWidget {
   String get statusText {
     switch (status) {
       case TravelStatus.confirmed:
-        return 'confirmé';
+        return 'Confirmé';
       case TravelStatus.pending:
-        return 'en_attente';
+        return 'En attente';
       case TravelStatus.completed:
-        return 'terminé';
+        return 'Terminé';
       case TravelStatus.cancelled:
-        return 'annulé';
+        return 'Annulé';
     }
   }
 

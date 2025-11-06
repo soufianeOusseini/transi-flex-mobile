@@ -10,7 +10,7 @@ import '../model/trip_result.dart';
 class ReserveTicketDialog extends StatefulWidget {
   final TripResult trip;
   final User currentUser;
-  final Function(String) onReserve;
+  final Function(String, String) onReserve;
 
   const ReserveTicketDialog({
     required this.trip,
@@ -28,7 +28,6 @@ class _ReserveTicketDialogState extends State<ReserveTicketDialog> {
 
   final List<String> _paymentMethods = [
     'ESPECES',
-    'CARTE_BANCAIRE',
     'MOBILE',
   ];
 
@@ -183,7 +182,7 @@ class _ReserveTicketDialogState extends State<ReserveTicketDialog> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _canSubmit() ? () {
-                            widget.onReserve(_selectedType!);
+                            widget.onReserve(_selectedType!, _selectedPayment!);
                           } : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _selectedType == 'ACHAT'
@@ -218,8 +217,6 @@ class _ReserveTicketDialogState extends State<ReserveTicketDialog> {
     switch (method) {
       case 'ESPECES':
         return 'Espèces';
-      case 'CARTE_BANCAIRE':
-        return 'Carte bancaire';
       case 'MOBILE':
         return 'Paiement mobile';
       default:

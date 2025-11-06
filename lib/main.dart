@@ -119,7 +119,9 @@ class MyApp extends StatelessWidget {
           create: (context) => sl<AuthCubit>(),
           child: const AuthPage(),
         ),
-        '/home': (context) => const HomePage(),
+        '/home': (context) => BlocProvider(
+    create: (context) => sl<AuthCubit>(),
+    child: const HomePage()),
       },
     );
   }

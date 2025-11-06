@@ -1,8 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:transi_flex_mobile/app_config.dart';
 import 'package:transi_flex_mobile/authentification/service/auth_service.dart';
+import 'package:transi_flex_mobile/client/model/check_transaction.dart';
 import 'package:transi_flex_mobile/core/exceptions.dart';
 import 'package:transi_flex_mobile/client/model/ticket.dart';
+
+import '../model/check_response.dart';
+import '../model/client_request.dart';
+import '../model/deposit_response.dart';
 
 abstract class TicketDataSource {
   Future<List<Ticket>> getTicketsByUser();
@@ -10,6 +15,10 @@ abstract class TicketDataSource {
   Future<Ticket> confirmReservation(int ticketId, String modePaiement);
   Future<Ticket> cancelTicket(int ticketId);
   Future<List<Ticket>> getTicketsByStatus(String status);
+
+//   paiment
+  Future<DepositResponse> makeDeposit(ClientRequest request);
+  Future<CheckResponse> checkTransactionStatus(CheckTransaction request);
 }
 
 class TicketDataSourceImpl implements TicketDataSource {
@@ -39,6 +48,7 @@ class TicketDataSourceImpl implements TicketDataSource {
   }
 
   String _getApiUrl() => '${AppConfig.apiUrl}/ticket';
+  String _getPaymentUrl() => '${AppConfig.apiUrl}/payment';
 
   @override
   Future<List<Ticket>> getTicketsByUser() async {
@@ -70,9 +80,6 @@ class TicketDataSourceImpl implements TicketDataSource {
       }
     } on DioException catch (e) {
       print('❌ Erreur getTicketsByUser: ${e.message}');
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
       throw ServerException(
         message: e.message ?? 'Erreur de communication',
         statusCode: e.response?.statusCode,
@@ -114,9 +121,6 @@ class TicketDataSourceImpl implements TicketDataSource {
     } on DioException catch (e) {
       print('❌ Erreur createTicket: ${e.message}');
       print('Response: ${e.response?.data}');
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
       throw ServerException(
         message: e.response?.data['message'] ?? e.message ?? 'Erreur de communication',
         statusCode: e.response?.statusCode,
@@ -157,9 +161,6 @@ class TicketDataSourceImpl implements TicketDataSource {
       }
     } on DioException catch (e) {
       print('❌ Erreur confirmReservation: ${e.message}');
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
       throw ServerException(
         message: e.message ?? 'Erreur de communication',
         statusCode: e.response?.statusCode,
@@ -197,9 +198,6 @@ class TicketDataSourceImpl implements TicketDataSource {
       }
     } on DioException catch (e) {
       print('❌ Erreur cancelTicket: ${e.message}');
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
       throw ServerException(
         message: e.message ?? 'Erreur de communication',
         statusCode: e.response?.statusCode,
@@ -239,14 +237,95 @@ class TicketDataSourceImpl implements TicketDataSource {
         );
       }
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
+
       throw ServerException(
         message: e.message ?? 'Erreur',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
+      throw NetworkException(message: 'Erreur de réseau: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<DepositResponse> makeDeposit(ClientRequest request) async {
+    try {
+      final headers = await _getHeaders();
+
+      print('💰 Initiation du dépôt');
+      print('📱 Téléphone: ${request.phone}');
+      print('💵 Montant: ${request.amount}');
+      print('🌐 Réseau: ${request.network}');
+
+      final response = await client.post(
+        '${_getPaymentUrl()}/deposit',
+        data: request.toJson(),
+        options: Options(
+          headers: headers,
+          receiveTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(seconds: 30),
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print('✅ Dépôt initié avec succès');
+        print('🎫 Référence: ${response.data['tx_reference']}');
+        return DepositResponse.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw ServerException(
+          message: response.data['message'] ?? 'Erreur lors du dépôt',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ Erreur makeDeposit: ${e.message}');
+      throw ServerException(
+        message: e.response?.data['message'] ?? e.message ?? 'Erreur de communication',
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      print('❌ Erreur: $e');
+      throw NetworkException(message: 'Erreur de réseau: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<CheckResponse> checkTransactionStatus(CheckTransaction request) async {
+    try {
+      final headers = await _getHeaders();
+
+      print('🔍 Vérification du statut de la transaction');
+      print('🎫 Référence: ${request.txReference}');
+
+      final response = await client.post(
+        '${_getPaymentUrl()}/check-status',
+        data: request.toJson(),
+        options: Options(
+          headers: headers,
+          receiveTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(seconds: 30),
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print('✅ Statut récupéré avec succès');
+        print('📊 Status: ${response.data['status']}');
+        print('💳 Méthode: ${response.data['payment_method']}');
+        return CheckResponse.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw ServerException(
+          message: response.data['message'] ?? 'Erreur lors de la vérification du statut',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ Erreur checkTransactionStatus: ${e.message}');
+      throw ServerException(
+        message: e.response?.data['message'] ?? e.message ?? 'Erreur de communication',
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      print('❌ Erreur: $e');
       throw NetworkException(message: 'Erreur de réseau: ${e.toString()}');
     }
   }

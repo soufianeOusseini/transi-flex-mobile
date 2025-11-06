@@ -1,4 +1,8 @@
 import 'package:dartz/dartz.dart';
+import 'package:transi_flex_mobile/client/model/check_response.dart';
+import 'package:transi_flex_mobile/client/model/check_transaction.dart';
+import 'package:transi_flex_mobile/client/model/client_request.dart';
+import 'package:transi_flex_mobile/client/model/deposit_response.dart';
 import 'package:transi_flex_mobile/core/exceptions.dart';
 import 'package:transi_flex_mobile/core/failures.dart';
 import 'package:transi_flex_mobile/client/datasource/ticket_data_source.dart';
@@ -77,6 +81,24 @@ class TicketRepository {
       return Left(NetworkFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: 'Erreur inconnue: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<String, DepositResponse>> makeDeposit(ClientRequest request) async {
+    try {
+      final response = await ticketDataSource.makeDeposit(request);
+      return Right(response);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  Future<Either<String, CheckResponse>> checkTransactionStatus(CheckTransaction request) async {
+    try {
+      final response = await ticketDataSource.checkTransactionStatus(request);
+      return Right(response);
+    } catch (e) {
+      return Left(e.toString());
     }
   }
 }

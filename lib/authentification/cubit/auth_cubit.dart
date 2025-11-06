@@ -44,7 +44,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> register({
     required String email,
-    required String password,
     required String nom,
     required String prenom,
     required String telephone,
@@ -56,7 +55,6 @@ class AuthCubit extends Cubit<AuthState> {
         firstName: prenom,
         lastName: nom,
         email: email,
-        password: password,
         phoneNumber: telephone,
       );
 
@@ -92,5 +90,8 @@ class AuthCubit extends Cubit<AuthState> {
         }
       },
     );
+  }
+  void resetToUnauthenticated() {
+    emit(AuthUnauthenticated());
   }
 }

@@ -5,10 +5,7 @@ import 'package:transi_flex_mobile/authentification/service/auth_service.dart';
 import 'package:transi_flex_mobile/client/model/trip_result.dart';
 import 'package:transi_flex_mobile/core/exceptions.dart';
 
-import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:transi_flex_mobile/app_config.dart';
-import 'package:transi_flex_mobile/core/exceptions.dart';
+
 
 abstract class TripSearchDataSource {
   Future<List<TripResult>> searchTrips({

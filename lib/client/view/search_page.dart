@@ -635,8 +635,13 @@ class _SearchPageState extends State<SearchPage> {
             child: ReserveTicketDialog(
               trip: trip,
               currentUser: currentUser,
-              onReserve: (typeTransaction) {
-                // Passer ticketCubit directement
+              onReserve: (typeTransaction, mode) {
+                if(mode == "MOBILE"){
+                  ticketCubit.makeDeposit(
+                      phone: currentUser.phone,
+                      amount : trip.prix.toInt(),
+                      network:  "TMONEY");
+                }
                 _createTicket(ticketCubit, trip, currentUser, typeTransaction);
               },
             ),

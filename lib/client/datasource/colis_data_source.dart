@@ -69,9 +69,6 @@ class ColisDataSourceImpl implements ColisDataSource {
       }
     } on DioException catch (e) {
       print('❌ Erreur getColisByUser: ${e.message}');
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
       throw ServerException(
         message: e.message ?? 'Erreur de communication',
         statusCode: e.response?.statusCode,
@@ -112,9 +109,6 @@ class ColisDataSourceImpl implements ColisDataSource {
     } on DioException catch (e) {
       print('❌ Erreur createColis: ${e.message}');
       print('Response: ${e.response?.data}');
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
       throw ServerException(
         message: e.response?.data['message'] ?? e.message ?? 'Erreur de communication',
         statusCode: e.response?.statusCode,
@@ -153,9 +147,6 @@ class ColisDataSourceImpl implements ColisDataSource {
       }
     } on DioException catch (e) {
       print('❌ Erreur updateColis: ${e.message}');
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
       throw ServerException(
         message: e.message ?? 'Erreur de communication',
         statusCode: e.response?.statusCode,
@@ -174,7 +165,7 @@ class ColisDataSourceImpl implements ColisDataSource {
       print('📦 Suppression du colis $colisId');
 
       final response = await client.delete(
-        '${_getApiUrl()}/$colisId',
+        '${_getApiUrl()}/delete/$colisId',
         options: Options(
           headers: headers,
           receiveTimeout: const Duration(seconds: 30),
@@ -192,9 +183,7 @@ class ColisDataSourceImpl implements ColisDataSource {
       }
     } on DioException catch (e) {
       print('❌ Erreur deleteColis: ${e.message}');
-      if (e.response?.statusCode == 401) {
-        await authService.removeTokens();
-      }
+
       throw ServerException(
         message: e.message ?? 'Erreur de communication',
         statusCode: e.response?.statusCode,

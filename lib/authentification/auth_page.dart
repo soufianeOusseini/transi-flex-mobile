@@ -15,12 +15,11 @@ class _AuthPageState extends State<AuthPage>
     with SingleTickerProviderStateMixin {
   bool isLogin = true;
   bool isPasswordVisible = false;
-  bool isConfirmPasswordVisible = false;
+  String? registrationMessage; // Message après inscription réussie
 
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   final _nomController = TextEditingController();
   final _prenomController = TextEditingController();
   final _telephoneController = TextEditingController();
@@ -46,7 +45,6 @@ class _AuthPageState extends State<AuthPage>
     _animationController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     _nomController.dispose();
     _prenomController.dispose();
     _telephoneController.dispose();
@@ -56,6 +54,7 @@ class _AuthPageState extends State<AuthPage>
   void _toggleAuthMode() {
     setState(() {
       isLogin = !isLogin;
+      registrationMessage = null; // Effacer le message lors du changement
     });
     _animationController.reset();
     _animationController.forward();
@@ -70,9 +69,9 @@ class _AuthPageState extends State<AuthPage>
           password: _passwordController.text,
         );
       } else {
+        // Inscription sans mot de passe
         context.read<AuthCubit>().register(
           email: _emailController.text.trim(),
-          password: _passwordController.text,
           nom: _nomController.text.trim(),
           prenom: _prenomController.text.trim(),
           telephone: _telephoneController.text.trim(),
@@ -95,14 +94,30 @@ class _AuthPageState extends State<AuthPage>
               ),
             );
           } else if (state is AuthAuthenticated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Connexion réussie!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            // Navigation vers la page principale
-            Navigator.of(context).pushReplacementNamed('/home');
+            if (state.isFromRegistration) {
+              // Inscription réussie -> Basculer vers connexion avec message
+              setState(() {
+                isLogin = true;
+                registrationMessage =
+                'Inscription réussie ! Un mot de passe a été envoyé à votre adresse email.';
+
+                // Réinitialiser les champs d'inscription
+                _nomController.clear();
+                _prenomController.clear();
+                _telephoneController.clear();
+                _passwordController.clear();
+                // Garder l'email pour faciliter la connexion
+              });
+
+              _animationController.reset();
+              _animationController.forward();
+
+              // Réinitialiser l'état du cubit
+              context.read<AuthCubit>().resetToUnauthenticated();
+            } else {
+              // Connexion réussie -> Navigation vers la page principale
+              Navigator.of(context).pushReplacementNamed('/home');
+            }
           }
         },
         child: SafeArea(
@@ -177,6 +192,39 @@ class _AuthPageState extends State<AuthPage>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
+
+            // Message de succès après inscription
+            if (isLogin && registrationMessage != null) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      color: Colors.green.shade700,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        registrationMessage!,
+                        style: TextStyle(
+                          color: Colors.green.shade900,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // Champs inscription uniquement
             if (!isLogin) ...[
@@ -256,7 +304,8 @@ class _AuthPageState extends State<AuthPage>
             ),
             const SizedBox(height: 20),
 
-            if(isLogin) ... [
+            // Champ mot de passe (uniquement pour la connexion)
+            if (isLogin) ...[
               _buildTextField(
                 controller: _passwordController,
                 label: 'Mot de passe',
@@ -277,6 +326,37 @@ class _AuthPageState extends State<AuthPage>
                   }
                   return null;
                 },
+              ),
+            ],
+
+            // Info pour l'inscription
+            if (!isLogin) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.blue.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Un mot de passe sera généré et envoyé à votre email',
+                        style: TextStyle(
+                          color: Colors.blue.shade900,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
 

@@ -519,6 +519,7 @@ class _ReservationsPageState extends State<ReservationsPage>
   }
 
   void _confirmReservation(Ticket ticket) {
+    final ticketCubit = context.read<TicketCubit>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -533,8 +534,7 @@ class _ReservationsPageState extends State<ReservationsPage>
           TextButton(
             onPressed: () {
               if (ticket.id != null) {
-                context
-                    .read<TicketCubit>()
+                ticketCubit
                     .confirmReservation(ticket.id!, 'CASH');
               }
               Navigator.pop(context);
@@ -557,6 +557,7 @@ class _ReservationsPageState extends State<ReservationsPage>
   }
 
   void _cancelTicket(Ticket ticket) {
+    final ticketCubit = context.read<TicketCubit>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -571,7 +572,7 @@ class _ReservationsPageState extends State<ReservationsPage>
           TextButton(
             onPressed: () {
               if (ticket.id != null) {
-                context.read<TicketCubit>().cancelTicket(ticket.id!);
+                ticketCubit.cancelTicket(ticket.id!);
               }
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(

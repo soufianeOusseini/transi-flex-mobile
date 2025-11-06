@@ -13,11 +13,12 @@ class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
   final User user;
+  final bool isFromRegistration;
 
-  const AuthAuthenticated({required this.user});
+  const AuthAuthenticated({required this.user, this.isFromRegistration = false});
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [user,isFromRegistration];
 }
 
 class AuthUnauthenticated extends AuthState {}

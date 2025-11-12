@@ -92,9 +92,8 @@ class TripSearchDataSourceImpl implements TripSearchDataSource {
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = response.data ?? [];
         print('✅ Résultats: ${jsonList.length} trajets trouvés');
-        return jsonList
-            .map((json) => TripResult.fromJson(json as Map<String, dynamic>))
-            .toList();
+        print('🔎 Premier élément: ${jsonList.isNotEmpty ? jsonList.first : 'liste vide'}');
+        return jsonList.map((json) => TripResult.fromJson(json as Map<String, dynamic>)).toList();
       } else {
         throw ServerException(
           message: response.data['message'] ?? 'Erreur lors de la recherche',

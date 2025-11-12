@@ -55,7 +55,9 @@ dependencies:
   # Functional Programming
   dartz: ^0.10.1
 
-
+  path_provider: ^2.1.1
+  permission_handler: ^11.0.1
+  open_file: ^3.3.2
   # Utils
   connectivity_plus: ^4.0.2  # Vérifier la connexion internet
   package_info_plus: ^4.2.0  # Infos sur l'app

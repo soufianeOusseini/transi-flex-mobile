@@ -58,6 +58,17 @@ class TravelCard extends StatelessWidget {
     }
   }
 
+  // Extraire le numéro de siège du seatInfo
+  String get seatNumber {
+    if (seatInfo.contains('Siège ')) {
+      final parts = seatInfo.split('Siège ');
+      if (parts.length > 1) {
+        return parts[1].split(' ')[0].split('•')[0].trim();
+      }
+    }
+    return seatInfo;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -76,6 +87,7 @@ class TravelCard extends StatelessWidget {
               ),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Column(
@@ -95,6 +107,7 @@ class TravelCard extends StatelessWidget {
                           color: AppColors.white.withOpacity(0.9),
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         seatInfo,
                         style: AppStyles.bodySmall.copyWith(
@@ -104,21 +117,52 @@ class TravelCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      "${price}",
-                      style: AppStyles.h2.copyWith(
-                        color: AppColors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    // Badge du siège en haut
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.white.withOpacity(0.4),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.event_seat,
+                            color: AppColors.white,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            seatNumber,
+                            style: AppStyles.bodyMedium.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    // Prix en dessous du siège
                     Text(
-                      currency,
-                      style: AppStyles.bodySmall.copyWith(
-                        color: AppColors.white.withOpacity(0.8),
+                      "$price $currency",
+                      style: AppStyles.h2.copyWith(
+                        color: AppColors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],

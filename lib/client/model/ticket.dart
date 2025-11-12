@@ -26,6 +26,7 @@ class Ticket extends Equatable {
   final String? companyName;
   final Trajet? trajet;
   final User? user;
+  final int? seatNumber;
 
   const Ticket({
     this.id,
@@ -46,14 +47,15 @@ class Ticket extends Equatable {
     this.trajetInfo,
     this.companyName,
     this.trajet,
-    this.user
+    this.user,
+    this.seatNumber,
   });
 
   @override
   List<Object?> get props => [
     id, prix, numero, status, date, heureDepart, userId, trajetId,
     modePaiement, reservationId, clientNom, clientPrenom, clientContact,
-    typeTransaction, dateLimitePaiement, trajetInfo, companyName, trajet, user
+    typeTransaction, dateLimitePaiement, trajetInfo, companyName, trajet, user, seatNumber
   ];
 
   Map<String, dynamic> toJson() {
@@ -76,7 +78,8 @@ class Ticket extends Equatable {
       'trajetInfo': trajetInfo,
       'companyName': companyName,
       'trajet': trajet?.toJson(),
-      'user': user?.toJson()
+      'user': user?.toJson(),
+      'seatNumber': seatNumber,
     };
   }
 
@@ -110,7 +113,8 @@ class Ticket extends Equatable {
       trajetInfo: json['trajetInfo'] as String?,
       companyName: json['companyName'] as String?,
       trajet: Trajet.fromJson(json['trajet'] ?? {}),
-      user: User.fromJson(json['user'] ?? {})
+      user: User.fromJson(json['user'] ?? {}),
+      seatNumber: json['seatNumber'],
     );
   }
 

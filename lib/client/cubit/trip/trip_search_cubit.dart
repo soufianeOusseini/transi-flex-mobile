@@ -16,7 +16,6 @@ class TripSearchCubit extends Cubit<TripSearchState> {
     required String villeArrive,
     required DateTime dateDepart,
     required TimeOfDay heureDepart,
-    required int nombrePassagers,
   }) async {
     emit(state.copyWith(status: TripSearchStatus.loading));
 
@@ -25,7 +24,7 @@ class TripSearchCubit extends Cubit<TripSearchState> {
       villeArrive: villeArrive,
       dateDepart: dateDepart,
       heureDepart: heureDepart,
-      nombrePassagers: nombrePassagers,
+      nombrePassagers: 1,
     );
 
     result.fold(

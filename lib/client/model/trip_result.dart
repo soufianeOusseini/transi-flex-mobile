@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:transi_flex_mobile/client/model/agency.dart';
+import 'package:transi_flex_mobile/client/model/bus.dart';
 import 'package:transi_flex_mobile/client/model/company.dart';
 import 'package:transi_flex_mobile/client/model/trajet.dart';
 
@@ -11,7 +12,7 @@ class TripResult extends Equatable {
   final TimeOfDay heureDepart;
   final int placesDisponibles;
   final double prix;
-  // final Bus bus;
+  final Bus bus;
   final Company company;
   final Agency agency;
 
@@ -22,7 +23,7 @@ class TripResult extends Equatable {
     required this.heureDepart,
     required this.placesDisponibles,
     required this.prix,
-    // required this.bus,
+    required this.bus,
     required this.company,
     required this.agency,
   });
@@ -42,7 +43,7 @@ class TripResult extends Equatable {
       heureDepart: heure,
       placesDisponibles: json['placesDisponibles'] ?? 0,
       prix: (json['prix'] ?? 0).toDouble(),
-      // bus: BusInf.fromJson(json['bus'] ?? {}),
+      bus: Bus.fromJson(json['bus'] ?? {}),
       company: Company.fromJson(json['company'] ?? {}),
       agency: Agency.fromJson(json['agency'] ?? {}),
     );
@@ -56,7 +57,7 @@ class TripResult extends Equatable {
       'heureDepart': '${heureDepart.hour.toString().padLeft(2, '0')}:${heureDepart.minute.toString().padLeft(2, '0')}',
       'placesDisponibles': placesDisponibles,
       'prix': prix,
-      // 'bus': bus.toJson(),
+      'bus': bus.toJson(),
       'company': company.toJson(),
       'agency': agency.toJson(),
     };
@@ -70,7 +71,7 @@ class TripResult extends Equatable {
     heureDepart,
     placesDisponibles,
     prix,
-    // bus,
+    bus,
     company,
     agency,
   ];

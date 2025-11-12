@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:transi_flex_mobile/client/model/check_transaction.dart';
@@ -171,13 +172,12 @@ class TicketCubit extends Cubit<TicketState> {
 
   Future<void> checkTransactionStatus({
     required String txReference,
-    required String authToken,
   }) async {
     emit(state.copyWith(status: TicketBuyStatus.payment_loading));
 
     final request = CheckTransaction(
       txReference: txReference,
-      authToken: authToken,
+      authToken: "",
     );
 
     final result = await repository.checkTransactionStatus(request);
@@ -188,4 +188,48 @@ class TicketCubit extends Cubit<TicketState> {
     );
   }
 
+  Future<void> downloadTicketPdf(int ticketId) async {
+    emit(state.copyWith(status: TicketBuyStatus.loading));
+
+    final result = await repository.downloadTicketPdf(ticketId);
+
+    result.fold(
+          (failure) {
+        emit(state.copyWith(
+          status: TicketBuyStatus.error,
+          errorMessage: failure.message,
+        ));
+      },
+          (pdfBytes) {
+        emit(state.copyWith(
+          status: TicketBuyStatus.pdf_downloaded,
+          pdfBytes: pdfBytes,
+          errorMessage: null,
+        ));
+      },
+    );
+  }
+
+
+  Future<void> getOccupiedSeats(int scheduleId) async {
+    emit(state.copyWith(status: TicketBuyStatus.loading));
+
+    final result = await repository.getOccupiedSeats(scheduleId);
+
+    result.fold(
+          (failure) {
+        emit(state.copyWith(
+          status: TicketBuyStatus.error,
+          errorMessage: failure.message,
+        ));
+      },
+          (occupiedSeats) {
+        emit(state.copyWith(
+          status: TicketBuyStatus.seats_loaded,
+          occupiedSeats: occupiedSeats,
+          errorMessage: null,
+        ));
+      },
+    );
+  }
 }

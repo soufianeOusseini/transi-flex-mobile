@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:transi_flex_mobile/app_config.dart';
 import 'package:transi_flex_mobile/authentification/service/auth_service.dart';
@@ -15,10 +17,13 @@ abstract class TicketDataSource {
   Future<Ticket> confirmReservation(int ticketId, String modePaiement);
   Future<Ticket> cancelTicket(int ticketId);
   Future<List<Ticket>> getTicketsByStatus(String status);
+  Future<Uint8List> downloadTicketPdf(int ticketId);
 
 //   paiment
   Future<DepositResponse> makeDeposit(ClientRequest request);
   Future<CheckResponse> checkTransactionStatus(CheckTransaction request);
+
+  Future<List<int>> getOccupiedSeats(int scheduleId);
 }
 
 class TicketDataSourceImpl implements TicketDataSource {
@@ -327,6 +332,63 @@ class TicketDataSourceImpl implements TicketDataSource {
     } catch (e) {
       print('❌ Erreur: $e');
       throw NetworkException(message: 'Erreur de réseau: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<int>> getOccupiedSeats(int scheduleId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await client.get(
+        '${await _getApiUrl()}/occupied-seats/$scheduleId',
+        options: Options(
+          headers: headers,
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return (response.data as List).cast<int>();
+      }
+      throw ServerException(message: 'Erreur lors de la récupération des sièges');
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<Uint8List> downloadTicketPdf(int ticketId) async {
+    try {
+      final headers = await _getHeaders();
+
+      final response = await client.get(
+        '${await _getApiUrl()}/$ticketId/pdf',
+        options: Options(
+          headers:headers,
+          responseType: ResponseType.bytes, // IMPORTANT pour télécharger le PDF
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print('✅ PDF téléchargé avec succès (${response.data.length} bytes)');
+        return Uint8List.fromList(response.data);
+      } else {
+        throw ServerException(
+          message: 'Erreur lors du téléchargement du PDF',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ Erreur Dio lors du téléchargement: ${e.message}');
+      throw ServerException(
+        message: e.message ?? 'Erreur lors du téléchargement du PDF',
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      print('❌ Erreur générale: $e');
+      throw NetworkException(
+        message: 'Erreur de réseau: ${e.toString()}',
+      );
     }
   }
 }

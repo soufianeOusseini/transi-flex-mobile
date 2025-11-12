@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dartz/dartz.dart';
 import 'package:transi_flex_mobile/client/model/check_response.dart';
 import 'package:transi_flex_mobile/client/model/check_transaction.dart';
@@ -99,6 +101,32 @@ class TicketRepository {
       return Right(response);
     } catch (e) {
       return Left(e.toString());
+    }
+  }
+
+  Future<Either<Failure, Uint8List>> downloadTicketPdf(int ticketId) async {
+    try {
+      final pdfBytes = await ticketDataSource.downloadTicketPdf(ticketId);
+      return Right(pdfBytes);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Erreur inconnue: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, List<int>>> getOccupiedSeats(int scheduleId) async {
+    try {
+      final seats = await ticketDataSource.getOccupiedSeats(scheduleId);
+      return Right(seats);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Erreur inconnue: ${e.toString()}'));
     }
   }
 }

@@ -13,6 +13,7 @@ import '../../shared/app_styles.dart';
 import '../../shared/custom_app_bar.dart';
 import '../cubit/ticket/ticket_cubit.dart';
 import '../model/ticket.dart';
+import 'book_ticket_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -139,10 +140,6 @@ class _SearchPageState extends State<SearchPage> {
               const SizedBox(width: AppStyles.spacingM),
               Expanded(
                 child: _buildTimeField(),
-              ),
-              const SizedBox(width: AppStyles.spacingM),
-              Expanded(
-                child: _buildPassengersField(),
               ),
             ],
           ),
@@ -575,28 +572,44 @@ class _SearchPageState extends State<SearchPage> {
       _showErrorSnackBar('Veuillez sélectionner une heure');
       return;
     }
-    if (_passengersController.text.isEmpty) {
-      _showErrorSnackBar('Veuillez entrer le nombre de passagers');
-      return;
-    }
 
-    final passengers = int.tryParse(_passengersController.text);
-    if (passengers == null || passengers <= 0) {
-      _showErrorSnackBar('Nombre de passagers invalide');
-      return;
-    }
 
     context.read<TripSearchCubit>().searchTrips(
       villeDepart: _departureController.text,
       villeArrive: _arrivalController.text,
       dateDepart: _selectedDate!,
       heureDepart: _selectedTime!,
-      nombrePassagers: passengers,
     );
   }
 
-  void _reserveTrip(TripResult trip) {
-    _showReserveTicketDialog(trip);
+// Dans search_page.dart, remplacer _reserveTrip:
+  void _reserveTrip(TripResult trip) async {
+    final userService = sl<UserService>();
+    final currentUser = await userService.getCurrentUser();
+
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur: Utilisateur non connecté'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Naviguer vers la page complète de réservation
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider<TicketCubit>(
+          create: (context) => TicketCubit(repository: sl<TicketRepository>()),
+          child: BookTicketPage(
+            trip: trip,
+            currentUser: currentUser,
+          ),
+        ),
+      ),
+    );
   }
 
   void _showErrorSnackBar(String message) {
